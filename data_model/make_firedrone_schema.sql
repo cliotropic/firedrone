@@ -1,6 +1,6 @@
 ﻿/*
 Created: 7/26/2018
-Modified: 7/26/2018
+Modified: 7/30/2018
 Model: Oracle 12c Release 2
 Database: Oracle 12c Release 2
 */
@@ -16,8 +16,8 @@ CREATE TABLE "Sensor"(
   "Sensor_Version" NVarchar2(50),
   "Description" NVarchar2(80),
   "Asset_Id" Integer DEFAULT 50,
-  "Min_Temperature" Integer,
-  "Max_Temperature" Integer
+  "Min_Value" Integer,
+  "Max_Value" Integer
 )
 /
 
