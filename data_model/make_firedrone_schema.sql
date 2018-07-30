@@ -8,26 +8,27 @@ Database: Oracle 12c Release 2
 
 -- Create tables section -------------------------------------------------
 
--- Table Asset
+-- Table Sensor
 
-CREATE TABLE "Asset"(
-  "Asset_Id" Integer DEFAULT 40 NOT NULL,
-  "Asset_Name" NVarchar2(60),
-  "Serial_Number" NVarchar2(50),
-  "Make" NVarchar2(60),
-  "Model" NVarchar2(50),
-  "Device_Id" Integer DEFAULT 50
+CREATE TABLE "Sensor"(
+  "Sensor_Id" Integer DEFAULT 40 NOT NULL,
+  "Sensor_Name" NVarchar2(60),
+  "Sensor_Version" NVarchar2(50),
+  "Description" NVarchar2(80),
+  "Asset_Id" Integer DEFAULT 50,
+  "Min_Temperature" Integer,
+  "Max_Temperature" Integer
 )
 /
 
--- Create indexes for table Asset
+-- Create indexes for table Sensor
 
-CREATE INDEX "IX_Relationship9" ON "Asset" ("Device_Id")
+CREATE INDEX "IX_Relationship3" ON "Sensor" ("Asset_Id")
 /
 
--- Add keys for table Asset
+-- Add keys for table Sensor
 
-ALTER TABLE "Asset" ADD CONSTRAINT "Key1" PRIMARY KEY ("Asset_Id")
+ALTER TABLE "Sensor" ADD CONSTRAINT "Key1" PRIMARY KEY ("Sensor_Id")
 /
 
 -- Table Location
@@ -36,8 +37,18 @@ CREATE TABLE "Location"(
   "Location_Id" Integer DEFAULT 50 NOT NULL,
   "Coordinate_X" Float(126),
   "Coordinate_Y" Float(126),
-  "Coordinate_Z" Float(126)
+  "Coordinate_Z" Float(126),
+  "Yoke" NVarchar2(30),
+  "Yaw" NVarchar2(30),
+  "Pitch" NVarchar2(30),
+  "Timestamp" Timestamp(6),
+  "Asset_Id" Integer DEFAULT 50
 )
+/
+
+-- Create indexes for table Location
+
+CREATE INDEX "IX_Relationship1" ON "Location" ("Asset_Id")
 /
 
 -- Add keys for table Location
@@ -50,19 +61,21 @@ ALTER TABLE "Location" ADD CONSTRAINT "Key2" PRIMARY KEY ("Location_Id")
 CREATE TABLE "Observation"(
   "Observation_Id" Integer DEFAULT 50 NOT NULL,
   "Value" NVarchar2(50),
-  "Event_Timestamp" Timestamp(6),
   "Created_Timestamp" Timestamp(6),
-  "Asset_Id" Integer DEFAULT 40,
-  "ObservationType_Id" Integer DEFAULT 50
+  "ObservationType_Id" Integer DEFAULT 50,
+  "Observation_location_X" Float(126),
+  "Observation_location_Y" Float(126),
+  "Observation_location_Z" Float(126),
+  "Sensor_Id" Integer DEFAULT 40
 )
 /
 
 -- Create indexes for table Observation
 
-CREATE INDEX "IX_Relationship3" ON "Observation" ("Asset_Id")
+CREATE INDEX "IX_Relationship5" ON "Observation" ("ObservationType_Id")
 /
 
-CREATE INDEX "IX_Relationship5" ON "Observation" ("ObservationType_Id")
+CREATE INDEX "IX_Relationship4" ON "Observation" ("Sensor_Id")
 /
 
 -- Add keys for table Observation
@@ -102,49 +115,45 @@ CREATE TABLE "UnitOfMeasure"(
 ALTER TABLE "UnitOfMeasure" ADD CONSTRAINT "Key5" PRIMARY KEY ("UOM_Id")
 /
 
--- Table Device
+-- Table Asset
 
-CREATE TABLE "Device"(
-  "Device_Id" Integer DEFAULT 50 NOT NULL,
-  "Roll" NVarchar2(30),
-  "Pitch" NVarchar2(30),
-  "Yaw" NVarchar2(30),
-  "% of Battery Present" Float(126),
-  "Location_Id" Integer DEFAULT 50,
-  "Device_Type" NVarchar2(60)
+CREATE TABLE "Asset"(
+  "Asset_Id" Integer DEFAULT 50 NOT NULL,
+  "Asset_Type" NVarchar2(60),
+  "Asset_Name" NVarchar2(60),
+  "% of battery present" Float(126),
+  "Make" NVarchar2(60),
+  "Model" NVarchar2(60),
+  "Serial_Number" NVarchar2(60),
+  "Event_Timestamp" Timestamp(6)
 )
 /
 
--- Create indexes for table Device
+-- Add keys for table Asset
 
-CREATE INDEX "IX_Relationship10" ON "Device" ("Location_Id")
-/
-
--- Add keys for table Device
-
-ALTER TABLE "Device" ADD CONSTRAINT "Key6" PRIMARY KEY ("Device_Id")
+ALTER TABLE "Asset" ADD CONSTRAINT "Key6" PRIMARY KEY ("Asset_Id")
 /
 
 
 -- Create foreign keys (relationships) section ------------------------------------------------- 
 
-ALTER TABLE "Observation" ADD CONSTRAINT "Asset Genrate Observation" FOREIGN KEY ("Asset_Id") REFERENCES "Asset" ("Asset_Id")
-/
-
-
 ALTER TABLE "Observation" ADD CONSTRAINT "Type of Observation" FOREIGN KEY ("ObservationType_Id") REFERENCES "Observation_Type" ("ObservationType_Id")
 /
 
 
-ALTER TABLE "Asset" ADD CONSTRAINT "Assets of Device" FOREIGN KEY ("Device_Id") REFERENCES "Device" ("Device_Id")
-/
-
-
-ALTER TABLE "Device" ADD CONSTRAINT "Location of Device" FOREIGN KEY ("Location_Id") REFERENCES "Location" ("Location_Id")
-/
-
-
 ALTER TABLE "Observation_Type" ADD CONSTRAINT "UOM of Observation Type" FOREIGN KEY ("UOM_Id") REFERENCES "UnitOfMeasure" ("UOM_Id")
+/
+
+
+ALTER TABLE "Location" ADD CONSTRAINT "Location of Asset" FOREIGN KEY ("Asset_Id") REFERENCES "Asset" ("Asset_Id")
+/
+
+
+ALTER TABLE "Sensor" ADD CONSTRAINT "Sensors mounted on Asset" FOREIGN KEY ("Asset_Id") REFERENCES "Asset" ("Asset_Id")
+/
+
+
+ALTER TABLE "Observation" ADD CONSTRAINT "Observation Collected by Sensor" FOREIGN KEY ("Sensor_Id") REFERENCES "Sensor" ("Sensor_Id")
 /
 
 
